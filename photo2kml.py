@@ -88,8 +88,8 @@ def export_kml_file(file_names, kml_name):
         pnt.coords = [(lon, lat)]
 
         # Add comtent to popup window
-        pnt.description = (
-            '<![CDATA[ <img src=' + file_name + ' height="500px" />]]>')
+        pnt.description = ('<![CDATA[' + '<img src=' + file_name +
+                           ' height="500px"/>' + ']]>')
         pnt.stylemap.normalstyle.iconstyle.scale = 1
         pnt.stylemap.normalstyle.iconstyle.icon.href = (
             'http://maps.google.com/'
