@@ -1,3 +1,4 @@
+import os
 import sys
 import glob
 import simplekml
@@ -69,17 +70,19 @@ def get_lat_lon(exif_data):
     return lat, lon
 
 
-def export_kml_file(file_names, kml_name):
+def export_kml_file(file_paths, kml_name):
     """
     Creates the kml document
   """
     kml = simplekml.Kml()
 
-    for file_name in file_names:
+    for file_path in file_paths:
 
-        print('Reading ' + file_name + '...')
+        print('Reading ' + file_path + '...')
 
-        with Image.open(file_name) as image:
+        file_name = os.path.basename(file_path)
+
+        with Image.open(file_path) as image:
             exif_data = get_exif_data(image)
 
         lat, lon = get_lat_lon(exif_data)
@@ -88,14 +91,16 @@ def export_kml_file(file_names, kml_name):
         pnt.coords = [(lon, lat)]
 
         # Add comtent to popup window
-        pnt.description = ('<![CDATA[' + '<img src=' + file_name +
-                           ' height="500px"/>' + ']]>')
+        pnt.description = ('<![CDATA[' + '<img src=' + file_path +
+                           ' height="600px"/>' + ']]>')
+        pnt.stylemap.normalstyle.labelstyle.scale = 0
         pnt.stylemap.normalstyle.iconstyle.scale = 1
         pnt.stylemap.normalstyle.iconstyle.icon.href = (
             'http://maps.google.com/'
             'mapfiles/kml/shapes/camera.png')
+        pnt.stylemap.highlightstyle.labelstyle.scale = 0
         pnt.stylemap.highlightstyle.iconstyle.scale = 2
-        pnt.stylemap.highlightstyle.iconstyle.icon.href = file_name
+        pnt.stylemap.highlightstyle.iconstyle.icon.href = file_path
 
     kml.save(kml_name)
 
@@ -103,10 +108,14 @@ def export_kml_file(file_names, kml_name):
 def main():
 
     if len(sys.argv) == 1:
-        file_names = glob.glob('*.jpg')
+        file_paths = glob.glob('*.jpg')
     else:
-        file_names = glob.glob(sys.argv[1])
-    export_kml_file(file_names, 'output.kml')
+        file_paths = glob.glob(sys.argv[1])
+
+    # Remove backslashes in Windows file paths
+    file_paths = [f.replace('\\', '/') for f in file_paths]
+
+    export_kml_file(file_paths, 'output.kml')
 
 
 if __name__ == '__main__':
